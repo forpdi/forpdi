@@ -67,7 +67,7 @@
 		"react-tooltip": "^3.9.2",
 		"string": "^3.3.3",
 		"toastr": "^2.1.4",
-		"underscore": "1.9.1"
+		"underscore": "1.12.1"
 	},
 	"repository": {
 		"type": "git",
