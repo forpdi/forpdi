@@ -3,12 +3,19 @@ version: "3.5"
 services:
         forpdi-database:
                 image: mysql:5.7
+                volumes:
+                        - mysql:/var/lib/mysql
                 environment:
                         MYSQL_ROOT_PASSWORD: docker12345
                         MYSQL_DATABASE: plataformafor
         forpdi-backend:
                 build: ./backend-java
                 image: platfor-backend
+                environment:
+                        - "JAVA_OPTS=-Djava.net.preferIPv4Stack=true"
+                volumes:
+                        - pdfs:/var/forpdi/pdfs
+                        - arquivos:/var/forpdi/files
                 depends_on:
                         - forpdi-database
                 ports:
@@ -21,3 +28,7 @@ services:
                         - forpdi-backend
                 ports:
                         - 80:80
+volumes:
+    pdfs:
+    arquivos:
+    mysql:

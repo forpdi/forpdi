@@ -1,0 +1,41 @@
+stages:
+  - build
+  - registry
+  - portainer
+
+###############################################################################################################
+build:
+  stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script:
+    - docker build ./backend-java -t "${CI_REGISTRY_IMAGE}/backend:$CI_COMMIT_REF_NAME" --no-cache
+    - docker build ./frontend-web -t "${CI_REGISTRY_IMAGE}/frontend:$CI_COMMIT_REF_NAME" --no-cache
+    - docker login $CI_REGISTRY -u $CI_REGISTRY_USER  -p $CI_REGISTRY_PASSWORD   
+    - docker push "${CI_REGISTRY_IMAGE}/backend:$CI_COMMIT_REF_NAME"
+    - docker push "${CI_REGISTRY_IMAGE}/frontend:$CI_COMMIT_REF_NAME"
+  only:
+    - master
+
+###############################################################################################################
+registry_producao:
+  stage: registry
+  variables:
+    GIT_CHECKOUT: "false"
+  before_script:
+    - docker login $CI_REGISTRY -u $CI_REGISTRY_USER  -p $CI_REGISTRY_PASSWORD
+  script:
+    - docker pull ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_NAME}
+    - docker pull ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_NAME}
+    - docker tag ${CI_REGISTRY_IMAGE}/backend:${CI_COMMIT_REF_NAME} ${CI_REGISTRY_IMAGE}/backend:latest
+    - docker tag ${CI_REGISTRY_IMAGE}/frontend:${CI_COMMIT_REF_NAME} ${CI_REGISTRY_IMAGE}/frontend:latest
+    - docker push ${CI_REGISTRY_IMAGE}/backend:latest
+    - docker push ${CI_REGISTRY_IMAGE}/frontend:latest
+
+###############################################################################################################
+deploy_prod:
+  stage: portainer
+  variables:
+    GIT_CHECKOUT: "false"
+  script:
+    - for i in $(echo ${WEBHOOK_PORTAINER_PRODUCAO} | sed "s/,/ /g"); do wget --post-data '' -O - "$i"; done

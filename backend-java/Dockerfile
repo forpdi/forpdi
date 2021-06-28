@@ -1,13 +1,9 @@
 FROM maven:3.6.0-jdk-8 as build
 
-ARG FOR_BRANCH=master
-RUN mkdir /usr/app
-RUN git clone https://github.com/forpdi/plataforma-for.git /usr/app/repo
+ADD  . /usr/app/repo/backend-java
+COPY conf/docker.dev.properties /usr/app/repo/backend-java/prd.properties
 
 WORKDIR /usr/app/repo/backend-java
-RUN git checkout ${FOR_BRANCH}
-
-COPY ./conf/docker.dev.properties /usr/app/repo/backend-java/prd.properties
 RUN mvn clean package -P prd
 
 

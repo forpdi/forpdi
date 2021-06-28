@@ -4,11 +4,9 @@ FROM node:10-stretch AS build
 RUN npm i -g yarn node-gyp --force
 RUN mkdir /usr/app
 
-ARG FOR_BRANCH=master
-RUN git clone https://github.com/forpdi/plataforma-for.git /usr/app/repo
+ADD  . /usr/app/repo/frontend-web
 
 WORKDIR /usr/app/repo/frontend-web
-RUN git checkout ${FOR_BRANCH}
 RUN NODE_ENV=development yarn --frozen-lockfile
 RUN NODE_ENV=production yarn build:docker
 
